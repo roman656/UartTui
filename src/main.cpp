@@ -3,4 +3,8 @@
 int main()
 {
     MainWindow window;
+
+    window.Run();
+
+    return 0;
 }

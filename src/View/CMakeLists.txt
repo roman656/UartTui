@@ -18,8 +18,8 @@ target_link_libraries(${VIEW_LIB_NAME}
         PUBLIC
                 ftxui::screen
                 ftxui::component
+                ftxui::dom
         PRIVATE
-                ${PROJECT_NAME}::ProjectSettings
-                ftxui::dom)
+                ${PROJECT_NAME}::ProjectSettings)
 
 target_include_directories(${VIEW_LIB_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
