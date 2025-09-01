@@ -1,5 +1,6 @@
 set(EXECUTABLE_NAME ${PROJECT_NAME})
 
+add_subdirectory(Packet)
 add_subdirectory(Port)
 add_subdirectory(View)
 
@@ -11,6 +12,7 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
         CXX_EXTENSIONS NO)
 
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE
+        ${PROJECT_NAME}::PacketLib
         ${PROJECT_NAME}::PortLib
         ${PROJECT_NAME}::ViewLib
         ${PROJECT_NAME}::ProjectSettings)
