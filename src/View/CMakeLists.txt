@@ -13,7 +13,7 @@ set_target_properties(${VIEW_LIB_NAME} PROPERTIES
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO)
 
-include(AddFTXUI)
+include(AddFtxui)
 target_link_libraries(${VIEW_LIB_NAME}
         PUBLIC
                 ftxui::screen
