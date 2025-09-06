@@ -13,13 +13,13 @@ set_target_properties(${VIEW_LIB_NAME} PROPERTIES
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO)
 
-include(AddFTXUI)
+include(AddFtxui)
 target_link_libraries(${VIEW_LIB_NAME}
         PUBLIC
                 ftxui::screen
                 ftxui::component
+                ftxui::dom
         PRIVATE
-                ${PROJECT_NAME}::ProjectSettings
-                ftxui::dom)
+                ${PROJECT_NAME}::ProjectSettings)
 
 target_include_directories(${VIEW_LIB_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
