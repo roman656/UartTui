@@ -1,47 +1,89 @@
 #include <iostream>
-#include <View/MainWindow.hpp>
-#include <Port/Port.hpp>
+
 #include <Packet/Packet.hpp>
+#include <Port/Port.hpp>
+#include <View/MainWindow.hpp>
+
+void ConfigurePort(asio::serial_port& port)
+{
+    port.set_option(asio::serial_port_base::baud_rate(115200));
+    port.set_option(asio::serial_port_base::character_size(std::numeric_limits<std::uint8_t>::digits));
+    port.set_option(asio::serial_port_base::parity(asio::serial_port_base::parity::even));
+    port.set_option(asio::serial_port_base::stop_bits(asio::serial_port_base::stop_bits::one));
+    port.set_option(asio::serial_port_base::flow_control(asio::serial_port_base::flow_control::none));
+}
 
 int main()
 {
+    using namespace std::chrono_literals;
+
+    asio::io_context ioContext;
+    asio::serial_port port(ioContext);
+    asio::steady_timer responseTimer(ioContext);
+
+#ifdef _WIN32
+    const std::string portName { "COM3" };
+#else
+    const std::string portName { "/tmp/ttyAPP" };
+#endif
+
+    try
+    {
+        /* Сперва надо открыть порт и уже потом настраивать */
+        port.open(portName);
+        ConfigurePort(port);
+
+        std::cout << "[main]: port opened\n";
+    }
+    catch (const asio::system_error& ex)
+    {
+        std::cerr << "[main]: " << ex.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    auto workGuard = asio::make_work_guard(ioContext);    // Нужно, чтобы ioContext.run() сразу не закончился (т. к. пока ему не поручено задач)
+
+    std::thread portThread([&ioContext] { ioContext.run(); });
+
+    std::this_thread::sleep_for(50ms);
+
     Packet packet;
+    packet.data = { 0xAB, 0xCD, 0x00, 0x01, 0xFF, 0x0A };
 
-    packet.data = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    std::vector<uint8_t> serializedPacket(packet.GetSerializedSize());
+    packet.SerializeTo(std::begin(serializedPacket));
 
-    std::vector<std::uint8_t> temp(packet.GetSerializedSize());
-    packet.SerializeTo(std::begin(temp));
+    const auto bufferToSendPtr = std::make_shared<std::vector<uint8_t>>(std::move(serializedPacket));
 
-    std::for_each(std::cbegin(temp), std::cend(temp), [](const std::uint8_t byte)
-            { std::cout << +byte << " "; });
-    std::cout << '\n';
+    asio::async_write(port, asio::buffer(*bufferToSendPtr),
+            [bufferToSendPtr](std::error_code errorCode, std::size_t bytesWritten) // bufferToSendPtr захватывается ради продления lifetime до конца асинхронной операции
+            {
+                if (errorCode)
+                {
+                    std::cerr << "[port thread]: write error: " << errorCode.message() << '\n';
+                }
+                else
+                {
+                    std::cout << "[port thread]: successfully sent " << bytesWritten << " bytes\n";
+                }
+            });
 
-    Packet packet2;
+    responseTimer.expires_after(3s);
+    responseTimer.async_wait([&port, &workGuard](std::error_code errorCode)
+            {
+                if (!errorCode)
+                {
+                    std::cout << "[port thread]: 3s elapsed, shutting down\n";
 
-    packet2.DeserializeFrom(std::cbegin(temp));
+                    std::error_code ignore;
+                    port.cancel(ignore);
+                    port.close(ignore);
 
-    const bool isOk = std::equal(std::cbegin(packet.data), std::cend(packet.data), std::cbegin(packet2.data));
+                    workGuard.reset();    // Позволим ioContext.run() завершиться
+                }
+            });
 
-    if (isOk)
-    {
-        std::cout << "OK" << std::endl;
-    }
-    else
-    {
-        std::cout << "ERROR" << std::endl;
+    std::this_thread::sleep_for(4s);
 
-        std::for_each(std::cbegin(packet2.data), std::cend(packet2.data), [](const std::uint8_t byte)
-                { std::cout << +byte << " "; });
-        std::cout << '\n';
-    }
-
-    Port port;
-
-    port.Test();
-
-    MainWindow window;
-
-    window.Run();
-
-    return 0;
+    portThread.join();
 }

@@ -2,12 +2,17 @@
 
 #include <iostream>
 
+Port::Port(std::string_view name)
+{
+
+}
+
 void Port::Test()
 {
     using namespace std::chrono_literals;
 
     constexpr unsigned baud = 115200;
-    asio::steady_timer timer {m_io};
+    asio::steady_timer timer {m_ioContext};
     asio::error_code errorCode;
 
     timer.expires_after(10ms);

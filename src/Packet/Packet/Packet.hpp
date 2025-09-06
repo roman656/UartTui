@@ -18,7 +18,7 @@ struct Packet final
     std::size_t GetSerializedSize() const noexcept;
 
     template<class OutputIterator>
-    OutputIterator SerializeTo(OutputIterator destinationFirst);
+    OutputIterator SerializeTo(OutputIterator destinationFirst) const;
 
     template<class InputIterator>
     void DeserializeFrom(InputIterator sourceFirst);
@@ -30,9 +30,9 @@ private:
 };
 
 template<class OutputIterator>
-OutputIterator Packet::SerializeTo(OutputIterator destinationFirst)
+OutputIterator Packet::SerializeTo(OutputIterator destinationFirst) const
 {
-    const std::uint32_t dataSize = std::size(data);
+    const auto dataSize = static_cast<std::uint32_t>(std::size(data));
     const std::size_t bufferSize = GetSerializedSize();
     std::vector<std::uint8_t> buffer(bufferSize);
     auto it = std::begin(buffer);

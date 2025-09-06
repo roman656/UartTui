@@ -6,7 +6,7 @@
 class Port final
 {
 public:
-    explicit Port() = default;
+    explicit Port(std::string_view name);
 
     Port(const Port&) = delete;
     Port(Port&&) = delete;
@@ -16,8 +16,8 @@ public:
     void Test();
 
 private:
-    asio::io_context m_io;
-    asio::serial_port m_serial {m_io};
+    asio::io_context m_ioContext;
+    asio::serial_port m_serial { m_ioContext };
 };
 
 #endif // PORT_PORT_HPP
