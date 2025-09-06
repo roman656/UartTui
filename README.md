@@ -1,10 +1,17 @@
 # UartTui
 
-TUI-приложение для взаимодействия с UART. Чисто тест
+TUI-приложение для взаимодействия с UART. Проверка идей
+
+## Зависимости
+- Asio (standalone)
+- FTXUI
+- GoogleTest (для тестов)
 
 ## Сборка
-
 ```bash
-# Клонируем и переходим в папку проекта
-cmake -S . -B build
-cmake --build build
+git clone <repo-url> UartTui
+cd UartTui
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+```

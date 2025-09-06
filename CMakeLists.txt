@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 project(UartTui
-        VERSION 0.0.1
+        VERSION 0.0.2
         DESCRIPTION "Test application with terminal UI and UART"
         LANGUAGES CXX)
 
