@@ -12,6 +12,7 @@ set_target_properties(${TESTS_EXECUTABLE_NAME} PROPERTIES
 
 include(AddGoogleTest)
 target_link_libraries(${TESTS_EXECUTABLE_NAME} PRIVATE
+        ${PROJECT_NAME}::PacketLib
         ${PROJECT_NAME}::ProjectSettings
         GTest::gtest_main
         GTest::gmock)
