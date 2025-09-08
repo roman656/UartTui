@@ -6,9 +6,7 @@
 #include <cstdint>
 #include <iomanip>
 #include <numeric>
-#include <stdexcept>
 #include <vector>
-#include <sstream>
 
 struct Packet final
 {
